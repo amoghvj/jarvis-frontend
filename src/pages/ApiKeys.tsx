@@ -17,7 +17,7 @@ import os
 import jarvis_observe
 
 jarvis_observe.init(
-    endpoint="https://YOUR-API-DOMAIN/v1/events",
+    endpoint="https://jarvis-backend-kappa-six.vercel.app/v1/events",
     api_key=os.environ["JARVIS_API_KEY"],
     project_id="my-project",
     service_id="backend",
@@ -28,7 +28,7 @@ const JS = `// npm install ./jarvis-observe   (Node.js 18+, CommonJS)
 const jarvis = require("jarvis-observe");
 
 jarvis.init({
-  endpoint: "https://YOUR-API-DOMAIN/v1/events",
+  endpoint: "https://jarvis-backend-kappa-six.vercel.app/v1/events",
   apiKey: process.env.JARVIS_API_KEY,
   projectId: "my-project",
   serviceId: "backend",
@@ -177,7 +177,7 @@ export function ApiKeys() {
           <CodeBlock label="Python" code={PY} />
           <CodeBlock label="JavaScript (Node.js)" code={JS} />
         </div>
-        <p className="mt-4 text-xs text-zinc-500">Replace <span className="font-mono">YOUR-API-DOMAIN</span> with your J.A.R.V.I.S. backend domain. <span className="font-mono">project_id</span> must be an existing project owned by your account.</p>
+        <p className="mt-4 text-xs text-zinc-500"><span className="font-mono">project_id</span> must be an existing project owned by your account.</p>
       </section>
 
       <ConfirmDialog
