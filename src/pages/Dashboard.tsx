@@ -1,4 +1,5 @@
 import { Activity, AlertOctagon, FolderGit2, Siren, type LucideIcon } from 'lucide-react'
+import { GitHubStatusCard } from '../components/GitHubStatusCard'
 import { demoActivity, demoIncidents, demoStats, demoTrend, type IncidentStatus, type Severity } from '../lib/demoData'
 
 // Temporarily disabled: set to true to show the demo-data notice again.
@@ -33,7 +34,7 @@ const Card = ({ children, className = '' }: { children: React.ReactNode; classNa
   <section className={`rounded-xl border border-line bg-card p-5 ${className}`}>{children}</section>
 )
 
-export function Dashboard({ username }: { username: string }) {
+export function Dashboard({ username, onOpenIntegrations }: { username: string; onOpenIntegrations: () => void }) {
   const max = Math.max(...demoTrend)
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
@@ -67,6 +68,8 @@ export function Dashboard({ username }: { username: string }) {
           )
         })}
       </div>
+
+      <GitHubStatusCard onOpen={onOpenIntegrations} />
 
       <Card className="mt-4">
         <h2 className="mb-4 text-sm font-medium text-white">Incidents detected · last 4 hours (15-min buckets)</h2>
@@ -115,4 +118,5 @@ export function Dashboard({ username }: { username: string }) {
     </div>
   )
 }
+
 

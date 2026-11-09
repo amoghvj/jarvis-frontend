@@ -3,8 +3,8 @@ import { Menu, X } from 'lucide-react'
 import { Logo } from './Logo'
 import { ProfileMenu } from './ProfileMenu'
 
-export type Page = 'Overview' | 'API Keys'
-const NAV: Page[] = ['Overview', 'API Keys']
+export type Page = 'Overview' | 'Integrations' | 'API Keys'
+const NAV: Page[] = ['Overview', 'Integrations', 'API Keys']
 
 export function Header({ active, setActive }: { active: Page; setActive: (p: Page) => void }) {
   const [mobile, setMobile] = useState(false)
@@ -44,5 +44,6 @@ export function Header({ active, setActive }: { active: Page; setActive: (p: Pag
     </header>
   )
 }
+
 
 

@@ -5,10 +5,14 @@ import { useState } from 'react'
 import { Header, type Page } from './components/Header'
 import { Dashboard } from './pages/Dashboard'
 import { ApiKeys } from './pages/ApiKeys'
+import { Integrations } from './pages/Integrations'
+import { consumeGitHubCallback, type GitHubCallback } from './lib/githubCallback'
 
 export default function App() {
   const { status, user, error, retry } = useAuth()
-  const [page, setPage] = useState<Page>('Overview')
+  // Read once (and strip from the URL) before anything else; only a UI hint, never proof.
+  const [callback, setCallback] = useState<GitHubCallback | null>(consumeGitHubCallback)
+  const [page, setPage] = useState<Page>(callback ? 'Integrations' : 'Overview')
 
   if (status === 'loading')
     return <div className="grid min-h-screen place-items-center"><Loader2 className="h-6 w-6 animate-spin text-accent" /></div>
@@ -29,9 +33,16 @@ export default function App() {
   return (
     <>
       <Header active={page} setActive={setPage} />
-      {page === 'API Keys' ? <ApiKeys /> : <Dashboard username={user.github_username} />}
+      {page === 'API Keys' ? (
+        <ApiKeys />
+      ) : page === 'Integrations' ? (
+        <Integrations callback={callback} onCallbackDismiss={() => setCallback(null)} />
+      ) : (
+        <Dashboard username={user.github_username} onOpenIntegrations={() => setPage('Integrations')} />
+      )}
     </>
   )
 }
+
 
 

@@ -55,6 +55,7 @@ export class UnauthorizedError extends Error {
 async function authed<T>(path: string, init: RequestInit = {}): Promise<T> {
   const res = await fetch(`${API_BASE_URL}${path}`, { ...init, credentials: 'include' })
   if (res.status === 401) throw new UnauthorizedError()
+  if (res.status === 403) throw new Error('Request blocked: this origin is not trusted by the backend (check FRONTEND_URL).')
   if (!res.ok) {
     let detail = `Request failed (${res.status})`
     try {
@@ -70,3 +71,33 @@ async function authed<T>(path: string, init: RequestInit = {}): Promise<T> {
 export const getApiKeyStatus = () => authed<ApiKeyStatus>('/api-keys/status')
 export const rotateApiKey = () => authed<RotatedKey>('/api-keys/rotate', { method: 'POST' })
 export const revokeApiKey = () => authed<MessageOut>('/api-keys', { method: 'DELETE' })
+
+// ---- GitHub App integration (backend app/schemas.py + app/routes/github.py) ----
+export interface GitHubInstallation {
+  installation_id: number
+  account_id: number
+  account_login: string
+  account_type: string
+  repository_selection: string | null
+  permissions: Record<string, unknown>
+  suspended_at: string | null
+  created_at: string
+  updated_at: string
+}
+export interface GitHubIntegrationStatus {
+  connected: boolean
+  installations: GitHubInstallation[]
+}
+export interface GitHubDisconnect {
+  status: string
+  message: string
+  installation_id: number
+}
+
+/** Full-page navigation target; the backend validates the session and redirects to GitHub. */
+export const githubInstallUrl = `${API_BASE_URL}/integrations/github/install`
+
+export const getGitHubStatus = () => authed<GitHubIntegrationStatus>('/integrations/github/status')
+export const disconnectGitHubInstallation = (installationId: number) =>
+  authed<GitHubDisconnect>(`/integrations/github/installations/${encodeURIComponent(String(installationId))}`, { method: 'DELETE' })
+
