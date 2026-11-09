@@ -1,6 +1,9 @@
 import { Activity, AlertOctagon, FolderGit2, Siren, type LucideIcon } from 'lucide-react'
 import { demoActivity, demoIncidents, demoStats, demoTrend, type IncidentStatus, type Severity } from '../lib/demoData'
 
+// Temporarily disabled: set to true to show the demo-data notice again.
+const SHOW_DEMO_BADGE = false
+
 const ICONS: LucideIcon[] = [Siren, Activity, AlertOctagon, FolderGit2]
 
 const SEV: Record<Severity, string> = {
@@ -39,9 +42,11 @@ export function Dashboard({ username }: { username: string }) {
           <h1 className="text-2xl font-semibold text-white">Welcome back, {username}</h1>
           <p className="mt-1 text-sm text-zinc-500">Here is what's happening across your systems.</p>
         </div>
-        <span className="rounded-full border border-yellow-500/30 bg-yellow-500/10 px-3 py-1 text-xs text-yellow-300">
-          Demo data — not live backend incidents
-        </span>
+        {SHOW_DEMO_BADGE && (
+          <span className="rounded-full border border-yellow-500/30 bg-yellow-500/10 px-3 py-1 text-xs text-yellow-300">
+            Demo data — not live backend incidents
+          </span>
+        )}
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -64,7 +69,7 @@ export function Dashboard({ username }: { username: string }) {
       </div>
 
       <Card className="mt-4">
-        <h2 className="mb-4 text-sm font-medium text-white">Incidents detected · last 14 days</h2>
+        <h2 className="mb-4 text-sm font-medium text-white">Incidents detected · last 4 hours (15-min buckets)</h2>
         <div className="flex h-32 items-end gap-2">
           {demoTrend.map((v, i) => (
             <div key={i} className="flex-1 rounded-t bg-accent/30 transition hover:bg-accent/70" style={{ height: `${(v / max) * 100}%` }} title={`${v} incidents`} />
