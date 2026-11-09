@@ -2,6 +2,7 @@ import { Loader2 } from 'lucide-react'
 import { useAuth } from './hooks/useAuth'
 import { LoginScreen } from './components/LoginScreen'
 import { useState } from 'react'
+import { AppShell } from './components/AppShell'
 import { Header, type Page } from './components/Header'
 import { Dashboard } from './pages/Dashboard'
 import { ApiKeys } from './pages/ApiKeys'
@@ -31,7 +32,7 @@ export default function App() {
   if (status === 'unauthenticated' || !user) return <LoginScreen />
 
   return (
-    <>
+    <AppShell>
       <Header active={page} setActive={setPage} />
       {page === 'API Keys' ? (
         <ApiKeys />
@@ -40,9 +41,10 @@ export default function App() {
       ) : (
         <Dashboard username={user.github_username} onOpenIntegrations={() => setPage('Integrations')} />
       )}
-    </>
+    </AppShell>
   )
 }
+
 
 
 
