@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { AgentChatProvider, useAgentChat } from '../hooks/useAgentChat'
+import { ProjectProvider } from '../hooks/useProject'
 import { AgentChatPanel } from './agent/AgentChatPanel'
 
 function Frame({ children }: { children: ReactNode }) {
@@ -13,12 +14,14 @@ function Frame({ children }: { children: ReactNode }) {
   )
 }
 
-/** Authenticated shell. Mounted once, so chat state survives page changes. */
+/** Authenticated shell. Mounted once, so project selection and chat state survive page changes. */
 export function AppShell({ children }: { children: ReactNode }) {
   return (
-    <AgentChatProvider>
-      <Frame>{children}</Frame>
-    </AgentChatProvider>
+    <ProjectProvider>
+      <AgentChatProvider>
+        <Frame>{children}</Frame>
+      </AgentChatProvider>
+    </ProjectProvider>
   )
 }
 

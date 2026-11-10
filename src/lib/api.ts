@@ -101,3 +101,68 @@ export const getGitHubStatus = () => authed<GitHubIntegrationStatus>('/integrati
 export const disconnectGitHubInstallation = (installationId: number) =>
   authed<GitHubDisconnect>(`/integrations/github/installations/${encodeURIComponent(String(installationId))}`, { method: 'DELETE' })
 
+// ---- Projects (backend app/schemas.py + app/routes/projects.py) ----
+export interface Project {
+  id: string // Internal UUID
+  project_id: string // External user-chosen project identifier
+  name: string // Display name
+  created_at: string
+  updated_at: string
+}
+
+export interface ProjectList {
+  projects: Project[]
+}
+
+export interface ProjectCreateInput {
+  project_id: string
+  name?: string | null
+}
+
+/** Thrown on 409 Conflict when the user already has a project with the given project_id. */
+export class DuplicateProjectError extends Error {
+  constructor(message = 'You already have a project with this project_id') {
+    super(message)
+  }
+}
+
+export const listProjects = () => authed<ProjectList>('/projects')
+
+export const getProject = (projectUuid: string) =>
+  authed<Project>(`/projects/${encodeURIComponent(projectUuid)}`)
+
+export async function createProject(input: ProjectCreateInput): Promise<Project> {
+  const payload: ProjectCreateInput = { project_id: input.project_id }
+  if (input.name && input.name.trim()) {
+    payload.name = input.name.trim()
+  }
+  const res = await fetch(`${API_BASE_URL}/projects`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+  if (res.status === 401) throw new UnauthorizedError()
+  if (res.status === 403) throw new Error('Request blocked: this origin is not trusted by the backend (check FRONTEND_URL).')
+  if (res.status === 409) {
+    let detail = 'You already have a project with this project_id'
+    try {
+      const body = await res.json()
+      if (typeof body?.detail === 'string') detail = body.detail
+    } catch { /* ignore */ }
+    throw new DuplicateProjectError(detail)
+  }
+  if (!res.ok) {
+    let detail = `Request failed (${res.status})`
+    try {
+      const body = await res.json()
+      if (typeof body?.detail === 'string') detail = body.detail
+      else if (Array.isArray(body?.detail) && body.detail[0]?.msg) detail = body.detail[0].msg
+      else if (typeof body?.message === 'string') detail = body.message
+    } catch { /* non-JSON error body */ }
+    throw new Error(detail)
+  }
+  return res.json() as Promise<Project>
+}
+
+

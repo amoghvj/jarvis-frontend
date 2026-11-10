@@ -36,11 +36,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(async () => {
     await apiLogout() // throws if the server session was not ended
+    try { localStorage.removeItem('jarvis_active_project_uuid') } catch { /* ignore */ }
     setUser(null)
     setStatus('unauthenticated')
   }, [])
 
   const expireSession = useCallback(() => {
+    try { localStorage.removeItem('jarvis_active_project_uuid') } catch { /* ignore */ }
     setUser(null)
     setStatus('unauthenticated')
   }, [])
