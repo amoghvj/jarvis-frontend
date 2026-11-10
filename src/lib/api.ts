@@ -61,6 +61,7 @@ async function authed<T>(path: string, init: RequestInit = {}): Promise<T> {
     try {
       const body = await res.json()
       if (typeof body?.detail === 'string') detail = body.detail
+      else if (Array.isArray(body?.detail) && body.detail[0]?.msg) detail = body.detail[0].msg
       else if (typeof body?.message === 'string') detail = body.message
     } catch { /* non-JSON error body */ }
     throw new Error(detail)
@@ -164,5 +165,54 @@ export async function createProject(input: ProjectCreateInput): Promise<Project>
   }
   return res.json() as Promise<Project>
 }
+
+// ---- Incidents (backend app/schemas.py: IncidentOut, IncidentListOut + app/routes/projects.py) ----
+export type IncidentStatus = 'open' | 'acknowledged' | 'resolved'
+export type IncidentSeverity = 'CRITICAL' | 'ERROR' | 'WARNING' | 'INFO' | 'DEBUG'
+
+export interface Incident {
+  id: string
+  project_id: string
+  title: string
+  status: IncidentStatus | (string & {})
+  severity: IncidentSeverity | (string & {}) | null
+  service_id: string | null
+  environment: string | null
+  event_count: number
+  first_seen_at: string | null
+  last_seen_at: string | null
+  acknowledged_at: string | null
+  resolved_at: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface IncidentList {
+  incidents: Incident[]
+  limit: number
+  offset: number
+  has_more: boolean
+}
+
+export interface ListIncidentsParams {
+  status?: IncidentStatus
+  limit?: number
+  offset?: number
+  signal?: AbortSignal
+}
+
+export function listIncidents(
+  projectUuid: string,
+  params: ListIncidentsParams = {},
+): Promise<IncidentList> {
+  const qs = new URLSearchParams()
+  if (params.status !== undefined) qs.set('status', params.status)
+  if (params.limit !== undefined) qs.set('limit', String(params.limit))
+  if (params.offset !== undefined) qs.set('offset', String(params.offset))
+  const query = qs.toString()
+  const path = `/projects/${encodeURIComponent(projectUuid)}/incidents${query ? `?${query}` : ''}`
+  return authed<IncidentList>(path, params.signal ? { signal: params.signal } : {})
+}
+
 
 
